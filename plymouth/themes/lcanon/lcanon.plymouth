@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=lcanon
+Description=lc-linux OS
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/lcanon
+ScriptFile=/usr/share/plymouth/themes/lcanon/lcanon.script
