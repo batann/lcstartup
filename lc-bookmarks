@@ -1,0 +1,274 @@
+#!/bin/bash
+# vim:fileencoding=utf-8:foldmethod=marker
+
+clear
+#{{{ >>> export fzf options
+export FZF_DEFAULT_OPTS="  --color=fg:#9FB1BC,fg+:#9FB1BC,bg:#2E5266,bg+:#2E5266\
+  --color=hl:#1a7ada,hl+:#9ae6ff,info:#e0e000,marker:#3ee421 \
+  --color=prompt:#1700af,spinner:#F4FFFD,pointer:#F4FFFD,header:#F4FFFD \
+  --color=border:#F7B32B,preview-fg:#9fb1bc,preview-bg:#2e5266 \
+  --color=preview-label:#00857a,label:#f7b32b,query:#d9d9d9 \
+  --border='sharp' --preview-window=right,50%,'wrap' \
+  --padding='2' --margin='4' --prompt='' --marker='->' \
+  --pointer='>>' --separator='─' --scrollbar='│' --info='inline'"
+#}}}
+#{{{ >>> Set Window Decorations
+#set window decorations
+ccc=$(wmctrl -l|tail -n1|awk '{print $1}')
+sudo /home/batan/100/bat/./toggle-decorations $ccc
+transset -i $ccc -t 0.8
+#}}}
+#{{{ >>> Prompt for tab
+# Initialize individual answer variables (aa1-aa30)
+for i in {1..30}; do
+    declare "aa$i=0"
+done
+
+# Questions and their answers (0 = No, 1 = Yes)
+QUESTIONS=(
+	"Bookmark the url to tab > Videos"
+	"Bookmark the url to tab > Buku"
+	"Bookmark the url to tab > Browser"
+	"Display current bookmarks fom buku"
+	"Display Tab Videos"
+	"Display Tab Buku"
+	"Display Tab Browser"
+	"Cancel"
+)
+
+ANSWERS=(0 0 0 0)  # Default all answers to No
+NUM_QUESTIONS=${#QUESTIONS[@]}
+selected=0  # Current selected row (-1 for Cancel, NUM_QUESTIONS for Accept)
+
+# Function to display the radio menu
+DISPLAY_MENU() {
+    clear
+
+    # Display Cancel option
+    if [[ $selected -eq -1 ]]; then
+        echo -e "${White}${Blue}[ Cancel ]${NC}"
+    else
+        echo -e "  Cancel  "
+    fi
+
+    echo "  +--------+---------------------------+"
+
+    # Display questions and their Yes/No options
+    for ((i=0; i<NUM_QUESTIONS; i++)); do
+        if [[ $selected -eq $i ]]; then
+            echo -ne "${White}${Blue}>"
+        else
+            echo -ne " "
+        fi
+
+        echo -ne " ${QUESTIONS[i]}"
+
+        # Move cursor to position 40
+        printf "%*s" $((40 - ${#QUESTIONS[i]})) ""
+
+        if [[ ${ANSWERS[i]} -eq 1 ]]; then
+            echo -e "[${Green}Yes${NC}] / No "
+        else
+            echo -e "Yes / [${Red}No${NC}] "
+        fi
+    done
+
+    echo "  +--------+---------------------------+"
+
+    # Display Accept option
+    if [[ $selected -eq $NUM_QUESTIONS ]]; then
+        echo -e "${White}${Blue}[ Accept and Continue ]${NC}"
+    else
+        echo -e "  Accept and Continue  "
+    fi
+}
+
+# Main loop
+while true; do
+    DISPLAY_MENU
+
+    read -sn1 key
+
+    if [[ $key == $'\e' ]]; then
+        read -sn1 key
+        if [[ $key == '[' ]]; then
+            read -sn1 key
+            case $key in
+                'A') # Up arrow
+                    ((selected--))
+                    if [[ $selected -lt -1 ]]; then
+                        selected=$NUM_QUESTIONS
+                    fi
+                    ;;
+                'B') # Down arrow
+                    ((selected++))
+                    if [[ $selected -gt $NUM_QUESTIONS ]]; then
+                        selected=-1
+                    fi
+                    ;;
+                'C') # Right arrow
+                    if [[ $selected -ge 0 && $selected -lt NUM_QUESTIONS ]]; then
+                        ANSWERS[selected]=1
+                    fi
+                    ;;
+                'D') # Left arrow
+                    if [[ $selected -ge 0 && $selected -lt NUM_QUESTIONS ]]; then
+                        ANSWERS[selected]=0
+                    fi
+                    ;;
+            esac
+        fi
+    elif [[ $key == '' ]]; then  # Enter key
+        if [[ $selected -eq -1 ]]; then
+            echo "Operation cancelled."
+            exit 1
+        elif [[ $selected -eq $NUM_QUESTIONS ]]; then
+            clear
+  
+
+#			echo "Selected answers:"
+#            for ((i=0; i<NUM_QUESTIONS; i++)); do
+#                echo "${QUESTIONS[i]}: ${ANSWERS[i]}"
+#                # Update individual variables
+#                declare "aa$((i+1))=${ANSWERS[i]}"
+#            done
+#            # Display individual variables
+#            echo -e "\nVariable values:"
+#            for i in {1..30}; do
+#                varname="aa$i"
+#                echo "$varname=${!varname}"
+#            done
+ 
+
+		fi
+	 
+	
+
+#}}}
+if [[ $aa1 = 1 ]]; then
+#{{{ >>> Append to Videos
+echo -e "\033[32m Listening for changes in Clipboard and appending to tab \033[31m$abc\033[32 ...\033[0m"
+
+# Initial clipboard content
+previous_clipboard=""
+
+# Listen for clipboard changes
+while true; do
+    # Get current clipboard content
+    current_clipboard=$(xclip -o -selection clipboard)
+
+    # Check if clipboard content has changed
+    if [[ "$current_clipboard" != "$previous_clipboard" ]]; then
+
+        # Append clipboard content to 
+        echo "$current_clipboard" >> /home/batan/.config/reminder/videos.bookmarks.md
+
+        # Update previous clipboard content
+        previous_clipboard="$current_clipboard"
+    fi
+
+    # Sleep for a short duration to avoid high CPU usage
+    sleep 0.2
+done
+#}}}
+elif [[ $aa2 = 1 ]]; then
+#{{{ >>> Append to Buku
+echo -e "\033[32m Listening for changes in Clipboard and appending to tab \033[31m$abc\033[32 ...\033[0m"
+
+# Initial clipboard content
+previous_clipboard=""
+
+# Listen for clipboard changes
+while true; do
+    # Get current clipboard content
+    current_clipboard=$(xclip -o -selection clipboard)
+
+    # Check if clipboard content has changed
+    if [[ "$current_clipboard" != "$previous_clipboard" ]]; then
+
+        # Append clipboard content to file1
+        echo "$current_clipboard" >> /home/batan/.config/reminder/buku.bookmarks.md
+
+        # Update previous clipboard content
+        previous_clipboard="$current_clipboard"
+    fi
+
+    # Sleep for a short duration to avoid high CPU usage
+    sleep 0.2
+done
+#}}}
+elif [[ $aa3 = 1 ]]; then
+#{{{ >>> Append to Browser
+echo -e "\033[32m Listening for changes in Clipboard and appending to tab \033[31m$abc\033[32 ...\033[0m"
+
+# Initial clipboard content
+previous_clipboard=""
+
+# Listen for clipboard changes
+while true; do
+    # Get current clipboard content
+    current_clipboard=$(xclip -o -selection clipboard)
+
+    # Check if clipboard content has changed
+    if [[ "$current_clipboard" != "$previous_clipboard" ]]; then
+
+        # Append clipboard content to file1
+        echo "$current_clipboard" >> /home/batan/.config/reminder/browser.bookmarks.md
+
+        # Update previous clipboard content
+        previous_clipboard="$current_clipboard"
+    fi
+
+    # Sleep for a short duration to avoid high CPU usage
+    sleep 0.2
+done
+#}}}
+elif [[ $aa4 = 1 ]]; then
+#{{{ >>> Read from buku bookmarks.db
+url=$(buku -p -f4 | fzf -m --reverse --preview "buku -p {1}" --preview-window=wrap | cut -f2)
+if [ -n "$url" ]; then
+	echo "$url" | xclip -selection clipboard &
+	echo "$url" | xargs firefox &
+fi
+#}}}
+elif [[ $aa5 = 1 ]]; then
+#{{{ >>>
+clear
+less /home/batan/.config/reminder/videos.bookmarks.md
+exit 0
+#}}}
+elif [[ $aa6 = 1 ]]; then
+#{{{ >>>
+less /home/batan/.config/reminder/buku.bookmarks.md
+exit 0
+#}}}
+elif [[ $aa7 = 1 ]]; then
+#{{{ >>>
+less /home/batan/.config/reminder/browser.bookmarks.md
+exit 0
+#}}}
+elif [[ $aa8 = 1 ]]; then
+#{{{ >>> Place Holder
+echo -e "\033[32mYou have choosen a Place Holder\033[0m"
+exit 0
+#}}}
+elif [[ $aa9 = 1 ]]; then
+#{{{ >>> Place Holder
+echo -e "\033[32mYou have choosen a Place Holder\033[0m"
+exit 0
+
+
+#}}}
+elif [[ $aa10 = 1 ]]; then
+#{{{ >>>
+echo -e "\033[32mYou have choosen to quit out off the script\033[0m"
+exit 0
+#}}}
+fi
+break
+	fi
+done
+
+
+
+
